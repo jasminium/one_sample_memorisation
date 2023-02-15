@@ -24,3 +24,8 @@ python eval_celeb_a.py
 # Rare concepts lead to memorisation experiment
 
 Launch the `toy_memorisation_extra_dim.ipynb` Jupyter notebook.
+
+# Authors
+
+John Hartley,
+Pedro Sanchez
