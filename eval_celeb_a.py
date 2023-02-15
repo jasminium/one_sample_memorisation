@@ -78,7 +78,7 @@ def inference_feature(dataloader, dataset, model, imshow=True, uf=True, softmax=
 
     return outputs
 
-def show_label_distribution(output_c, output_uf, labels, cum=False, output_dir=None):
+def show_label_distribution(output_c, output_uf, labels, cum=False, output_dir='figures'):
     f, axes = plt.subplots(1, 2, constrained_layout=True, figsize=(10, 10))
     axes = axes.flatten()
     
@@ -93,11 +93,8 @@ def show_label_distribution(output_c, output_uf, labels, cum=False, output_dir=N
 
         axes[i].legend()
         axes[i].set_title(f'{i}')
-    if output_dir:
         plt.savefig(output_dir / 'label_dist.png', dpi=330)
         plt.close()
-    else:
-        plt.show()
 
 def evaluate(experiment=None, show_label_dist=True, n_models=30, threshold=0, n=None, resize=None, cardinality=None, canary_frequency=None):
 
@@ -167,8 +164,68 @@ def evaluate(experiment=None, show_label_dist=True, n_models=30, threshold=0, n=
     
     return df_r
 
-if __name__ == '__main__':
+def plot():
 
+    import pandas as pd
+    import matplotlib.pyplot as plt
+    import seaborn as sns
+
+    sns.set_style('whitegrid')
+    sns.set_palette("Set2")
+
+    SMALL_SIZE = 8
+    MEDIUM_SIZE = 8
+    BIGGER_SIZE = 8
+
+    plt.rc('font', size=SMALL_SIZE)          # controls default text sizes
+    plt.rc('axes', titlesize=SMALL_SIZE)     # fontsize of the axes title
+    plt.rc('axes', labelsize=MEDIUM_SIZE)    # fontsize of the x and y labels
+    plt.rc('xtick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
+    plt.rc('ytick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
+    plt.rc('legend', fontsize=SMALL_SIZE)    # legend fontsize
+    plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
+
+
+    sns.set_style('whitegrid')
+    sns.set_palette("Set2")
+
+    df = pd.read_csv('whitebox_celeba.csv')
+
+    print(df.columns)
+
+    d0 = df[(df['wb_mean_pval'] < 0.05) & (df['canary frequency'] == 1)]['wb_mean']
+    print(f'{(len(d0))} / {len(df) // 2} n model memorised {(len(d0)) / (len(df) // 2)} ')
+    print(f"average memorisation {d0.mean():.2f}")
+
+    df[r'$\hat{y}$'] = df['y_hat_mean']
+
+    df = df.loc[(df['wb_mean_pval'] < 0.05)]
+
+    f, ax = plt.subplots(1, 2, constrained_layout=True, figsize=(6.9 * (2/3), 6.9 / 1.6 / 2))
+
+    ax.flatten()
+
+    cmap = {
+        1: 'C0',
+        0: 'C2',
+    }
+
+    df_0 = df.loc[(df['uf dim'] == 5) & (df['canary frequency'] == 1)]
+    df_1 = df.loc[(df['uf dim'] == 5) & (df['canary frequency'] == 100)]
+
+    sns.scatterplot(data=df_0, x='wb_mean', y='wb_mean_arg_max', hue=r'$\hat{y}$', ax=ax[0], palette=cmap )
+    sns.scatterplot(data=df_1, x='wb_mean', y='wb_mean_arg_max', hue=r'$\hat{y}$', ax=ax[1], palette=cmap  )
+
+    ax[0].set_xlabel(r'$M$')
+    ax[0].set_ylabel(r'$\mathrm{max}(M)$')
+    ax[1].set_xlabel(r'$M$')
+    ax[1].set_ylabel(r'$\mathrm{max}(M)$')
+
+    plt.savefig('figures/celeb_a_m_scores.png', dpi=330)
+    plt.close()
+
+if __name__ == '__main__':
+    """
     # canary feature frequencies
     nc_l = [1, 100]
     # dataset cardinality
@@ -187,3 +244,6 @@ if __name__ == '__main__':
 
     df = pd.concat(df, ignore_index=True)
     df.to_csv(outputfile)
+    """
+
+    plot()
