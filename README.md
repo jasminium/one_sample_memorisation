@@ -5,7 +5,7 @@
 ```
 pip install tqdm scikit-learn pandas seaborn scikit-image 
 ```
-1. Setup attractive/not attractive labels for the Celeb-A dataset.
+1. Setup directories
 ```
 python utils.py
 ```
@@ -19,6 +19,7 @@ python train_celeb_a.py
 ```
 python eval_celeb_a.py
 ```
+3. Results output to whitebox_celeb_a.py
 
 # Rare concepts lead to memorisation experiment
 
