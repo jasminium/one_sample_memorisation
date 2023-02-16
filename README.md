@@ -12,8 +12,9 @@ python utils.py
 
 # Key Results
 
-## Run Celeb-A memorisation experiment
+## Celeb-A memorisation experiment
 
+### Run experiment
 Run time approximately 1 hour on a Titan RTX GPU.
 
 1. Train Celeb-A models on Celeb-A containing a single random unique feature on a randomly chosen image.
@@ -40,7 +41,9 @@ We find we can detect memorisation of a unique feature in these models without a
 ![alt text](figures/cifar10_m_scores.png)
 
 
-## Rare concepts lead to memorisation experiment
+## Rare concepts lead to memorisation
+
+### Run
 
 Launch the `toy_memorisation_extra_dim.ipynb` Jupyter notebook.
 
