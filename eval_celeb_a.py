@@ -28,7 +28,7 @@ std = [1, 1, 1]
 
 # select memorisation test setting
 if os.environ['SETTING'] == 'blackbox':
-    outputfile = 'celeba_whitebox.csv'
+    outputfile = 'celeba_blackbox.csv'
     eval_dataset = 'cifar10'
 elif os.environ['SETTING'] == 'greybox':
     outputfile = 'celeba_greybox.csv'
