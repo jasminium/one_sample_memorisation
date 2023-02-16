@@ -219,6 +219,7 @@ def plot():
     df = df.loc[(df['whitebox_m_pval'] < 0.05)]
 
     f, ax = plt.subplots(1, 2, constrained_layout=True, figsize=(6.9 * (2/3), 6.9 / 1.6 / 2))
+    plt.suptitle(f"{os.environ['SETTING']} setting")
 
     ax.flatten()
 
@@ -235,21 +236,24 @@ def plot():
 
     ax[0].set_xlabel(r'$M$')
     ax[0].set_ylabel(r'$\mathrm{max}(M)$')
+    ax[0].set_title('1 unique feature in training data')
     ax[1].set_xlabel(r'$M$')
     ax[1].set_ylabel(r'$\mathrm{max}(M)$')
+    ax[1].set_title('100 unique features in training data')
+
 
     plt.savefig(f'figures/{eval_dataset}_m_scores.png', dpi=330)
     plt.close()
 
 if __name__ == '__main__':
-
+    """
     # canary feature frequencies
     nc_l = [1, 100]
     # dataset cardinality
     n_l = [10000]
     # uf feature sizes
     resizes = [None]
-
+    
     df = []
 
     for nc in nc_l:
@@ -261,5 +265,5 @@ if __name__ == '__main__':
 
     df = pd.concat(df, ignore_index=True)
     df.to_csv(outputfile)
-
+    """
     plot()
