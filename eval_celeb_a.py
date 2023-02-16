@@ -13,16 +13,20 @@ import warnings
 warnings.filterwarnings('ignore')
 
 from datasets.celeba_uf import CelebA
+from datasets.cifar10big import CIFAR10Big
+
 from metrics import whitebox_mean
 
 device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
-outputfile = 'whitebox_celeba.csv'
 s_directory = 'results/celeba'
 canary_label = 1
 n_classes = 2
 batch_size = 512
 mean = [0, 0, 0]
 std = [1, 1, 1]
+
+outputfile = 'blackbox_celeba.csv'
+eval_dataset = 'cifar10' # cifar10 (blackbox) or celeb a (whitebox)
 
 basic_transforms = [
     transforms.ToTensor(),
@@ -96,10 +100,17 @@ def show_label_distribution(output_c, output_uf, labels, cum=False, output_dir='
         plt.savefig(output_dir / 'label_dist.png', dpi=330)
         plt.close()
 
-def evaluate(experiment=None, show_label_dist=True, n_models=30, threshold=0, n=None, resize=None, cardinality=None, canary_frequency=None):
+def evaluate(experiment=None, show_label_dist=True, n_models=30, threshold=0, n=None, resize=None, cardinality=None, canary_frequency=None, ds='celeba'):
 
-    dataset = CelebA(root='./data', split='test',
-                    download=True, transform=basic_transforms, target_type='attr', canary_id='all', n=n, label_type='attractive', resize=resize)
+    if ds == 'celeba':
+        dataset = CelebA(root='./data', split='test',
+                        download=True, transform=basic_transforms, target_type='attr', canary_id='all', n=n, label_type='attractive', resize=resize)
+    elif ds == 'cifar10':
+        dataset = CIFAR10Big(root='./data', train=True,
+                        download=True, transform=basic_transforms, canary_id='all')
+    else:
+        raise ImportError(f'dataset {ds} is unknown')
+
 
     dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size,
                                                 shuffle=False, num_workers=2)
@@ -189,7 +200,7 @@ def plot():
     sns.set_style('whitegrid')
     sns.set_palette("Set2")
 
-    df = pd.read_csv('whitebox_celeba.csv')
+    df = pd.read_csv(outputfile)
 
     print(df.columns)
 
@@ -221,11 +232,11 @@ def plot():
     ax[1].set_xlabel(r'$M$')
     ax[1].set_ylabel(r'$\mathrm{max}(M)$')
 
-    plt.savefig('figures/celeb_a_m_scores.png', dpi=330)
+    plt.savefig(f'figures/{eval_dataset}_m_scores.png', dpi=330)
     plt.close()
 
 if __name__ == '__main__':
-    """
+
     # canary feature frequencies
     nc_l = [1, 100]
     # dataset cardinality
@@ -239,11 +250,10 @@ if __name__ == '__main__':
         for n in n_l:
             for resize in resizes:
                 experiment = f'{nc}_canaries_attractive_ds_{n}_resize_{resize}'
-                df_i = evaluate(experiment=experiment, show_label_dist=True, n_models=10, resize=resize, n=None, cardinality=n, canary_frequency=nc)
+                df_i = evaluate(experiment=experiment, show_label_dist=True, n_models=10, resize=resize, n=None, cardinality=n, canary_frequency=nc, ds=eval_dataset)
                 df.append(df_i)
 
     df = pd.concat(df, ignore_index=True)
     df.to_csv(outputfile)
-    """
 
     plot()

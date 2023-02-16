@@ -212,4 +212,7 @@ class CIFAR10Big(VisionDataset):
         split = "Train" if self.train is True else "Test"
         return f"Split: {split}"
 
+    def get_targets(self):
+        labels = self.targets
+        return labels
 
