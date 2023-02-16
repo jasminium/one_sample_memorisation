@@ -246,7 +246,6 @@ def plot():
     plt.close()
 
 if __name__ == '__main__':
-    """
     # canary feature frequencies
     nc_l = [1, 100]
     # dataset cardinality
@@ -265,5 +264,4 @@ if __name__ == '__main__':
 
     df = pd.concat(df, ignore_index=True)
     df.to_csv(outputfile)
-    """
     plot()
