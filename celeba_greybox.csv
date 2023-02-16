@@ -1,4 +1,4 @@
-,wb_mean,wb_mean_arg_max,wb_mean_pval,wb_mean_arg_max_pval,y_hat_mean,uf dim,canary frequency,cardinality
+,whitebox_m,blackbox_m,whitebox_m_pval,blackbox_m_pval,y_hat,uf dim,canary frequency,cardinality
 0,0.011207079,0.011207079,3.416520434023204e-76,3.416520434023204e-76,1,5,1,10000
 1,0.007042137,0.007042137,4.4395398277835313e-48,4.4395398277835313e-48,1,5,1,10000
 2,0.008974678,0.008974678,1.0736039636967539e-39,1.0736039636967539e-39,1,5,1,10000

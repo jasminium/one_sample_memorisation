@@ -1,4 +1,5 @@
 from pathlib import Path
+import os
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -15,7 +16,7 @@ warnings.filterwarnings('ignore')
 from datasets.celeba_uf import CelebA
 from datasets.cifar10big import CIFAR10Big
 
-from metrics import whitebox_mean
+from metrics import whitebox_mem_score
 
 device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
 s_directory = 'results/celeba'
@@ -25,8 +26,15 @@ batch_size = 512
 mean = [0, 0, 0]
 std = [1, 1, 1]
 
-outputfile = 'blackbox_celeba.csv'
-eval_dataset = 'cifar10' # cifar10 (blackbox) or celeb a (whitebox)
+# select memorisation test setting
+if os.environ['SETTING'] == 'blackbox':
+    outputfile = 'celeba_whitebox.csv'
+    eval_dataset = 'cifar10'
+elif os.environ['SETTING'] == 'greybox':
+    outputfile = 'celeba_greybox.csv'
+    eval_dataset = 'celeba'
+else:
+    raise NotImplementedError('SETTING unknown')
 
 basic_transforms = [
     transforms.ToTensor(),
@@ -109,8 +117,7 @@ def evaluate(experiment=None, show_label_dist=True, n_models=30, threshold=0, n=
         dataset = CIFAR10Big(root='./data', train=True,
                         download=True, transform=basic_transforms, canary_id='all')
     else:
-        raise ImportError(f'dataset {ds} is unknown')
-
+        raise NotImplementedError(f'dataset {ds} is unknown')
 
     dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size,
                                                 shuffle=False, num_workers=2)
@@ -135,7 +142,7 @@ def evaluate(experiment=None, show_label_dist=True, n_models=30, threshold=0, n=
         labels = dataset.get_targets()
 
         # metrics            
-        m1, pval, _ = whitebox_mean(y_c, y_uf, canary_label, labels)
+        m1, pval, _ = whitebox_mem_score(y_c, y_uf, canary_label, labels)
         wb_mean.append(m1)
         wb_mean_pval.append(pval)
 
@@ -143,7 +150,7 @@ def evaluate(experiment=None, show_label_dist=True, n_models=30, threshold=0, n=
         stat_mean = []
         pval_mean = []
         for k in range(n_classes):
-            m1, pval, _ = whitebox_mean(y_c, y_uf, k, labels)
+            m1, pval, _ = whitebox_mem_score(y_c, y_uf, k, labels)
             stat_mean.append(m1)
             pval_mean.append(pval)
         
@@ -161,11 +168,11 @@ def evaluate(experiment=None, show_label_dist=True, n_models=30, threshold=0, n=
         uf_dim = 5
 
     dataf = {
-        'wb_mean': wb_mean,
-        'wb_mean_arg_max': wb_mean_arg_max,
-        'wb_mean_pval': wb_mean_pval,
-        'wb_mean_arg_max_pval': wb_mean_arg_max_pval,
-        'y_hat_mean': y_hat_mean,
+        'whitebox_m': wb_mean,
+        'blackbox_m': wb_mean_arg_max,
+        'whitebox_m_pval': wb_mean_pval,
+        'blackbox_m_pval': wb_mean_arg_max_pval,
+        'y_hat': y_hat_mean,
         'uf dim': uf_dim,
         'canary frequency': canary_frequency,
         'cardinality': cardinality
@@ -196,7 +203,6 @@ def plot():
     plt.rc('legend', fontsize=SMALL_SIZE)    # legend fontsize
     plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
 
-
     sns.set_style('whitegrid')
     sns.set_palette("Set2")
 
@@ -204,13 +210,13 @@ def plot():
 
     print(df.columns)
 
-    d0 = df[(df['wb_mean_pval'] < 0.05) & (df['canary frequency'] == 1)]['wb_mean']
+    d0 = df[(df['whitebox_m_pval'] < 0.05) & (df['canary frequency'] == 1)]['whitebox_m']
     print(f'{(len(d0))} / {len(df) // 2} n model memorised {(len(d0)) / (len(df) // 2)} ')
     print(f"average memorisation {d0.mean():.2f}")
 
-    df[r'$\hat{y}$'] = df['y_hat_mean']
+    df[r'$\hat{y}$'] = df['y_hat']
 
-    df = df.loc[(df['wb_mean_pval'] < 0.05)]
+    df = df.loc[(df['whitebox_m_pval'] < 0.05)]
 
     f, ax = plt.subplots(1, 2, constrained_layout=True, figsize=(6.9 * (2/3), 6.9 / 1.6 / 2))
 
@@ -224,8 +230,8 @@ def plot():
     df_0 = df.loc[(df['uf dim'] == 5) & (df['canary frequency'] == 1)]
     df_1 = df.loc[(df['uf dim'] == 5) & (df['canary frequency'] == 100)]
 
-    sns.scatterplot(data=df_0, x='wb_mean', y='wb_mean_arg_max', hue=r'$\hat{y}$', ax=ax[0], palette=cmap )
-    sns.scatterplot(data=df_1, x='wb_mean', y='wb_mean_arg_max', hue=r'$\hat{y}$', ax=ax[1], palette=cmap  )
+    sns.scatterplot(data=df_0, x='whitebox_m', y='blackbox_m', hue=r'$\hat{y}$', ax=ax[0], palette=cmap )
+    sns.scatterplot(data=df_1, x='whitebox_m', y='blackbox_m', hue=r'$\hat{y}$', ax=ax[1], palette=cmap  )
 
     ax[0].set_xlabel(r'$M$')
     ax[0].set_ylabel(r'$\mathrm{max}(M)$')
