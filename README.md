@@ -17,7 +17,7 @@ python utils.py
 ### Run experiment
 Run time approximately 1 hour on a Titan RTX GPU.
 
-1. Train  ResNet18 models on Celeb-A containing a single random unique feature on a randomly chosen image.
+1. Train  10 ResNet18 models on Celeb-A containing a single random unique feature on a randomly chosen image.
 ```
 python train_celeb_a.py
 ```
@@ -28,11 +28,11 @@ python eval_celeb_a.py
 export SETTING=blackbox
 python eval_celeb_a.py
 ```
-3. Results output to ```celeba_greybox.csv```, ```celeba_whitebox.csv```
+3. Results output to ```celeba_greybox.csv```, ```celeba_blackbox.csv```
 
 ### Results
 
-We find memorisation of unique features in 8/10 ResNet18 models trained on Celeb A containing a single unique feature.
+We find memorisation of unique features in 8/10 ResNet18 models trained on Celeb A containing a single unique feature. x-axis is the whitebox memorisation score. y-axis is the greybox memorisation score. We show results for statistically significant (p<0.05) memorisation events captured by the whitebox memorisation score.
 
 ![alt text](figures/celeba_m_scores.png)
 
