@@ -17,7 +17,7 @@ python utils.py
 ### Run experiment
 Run time approximately 1 hour on a Titan RTX GPU.
 
-1. Train Celeb-A models on Celeb-A containing a single random unique feature on a randomly chosen image.
+1. Train  ResNet18 models on Celeb-A containing a single random unique feature on a randomly chosen image.
 ```
 python train_celeb_a.py
 ```
